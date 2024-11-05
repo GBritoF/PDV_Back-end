@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuarios {
+  id                Int      @id @default(autoincrement())
+  nome              String
+  email             String   @unique
+  senha             String
+  emailVerified     Boolean  @default(false)
+  confirmationToken String?  @unique
+  createdAt         DateTime @default(now())
+
+  @@map("usuarios")
+}
+
+model Categorias {
+  id        Int        @id @default(autoincrement())
+  descricao String
+  Produtos  Produtos[]
+
+  @@map("categorias")
+}
+
+model Produtos {
+  id                 Int              @id @default(autoincrement())
+  descricao          String
+  quantidade_estoque Int
+  valor              Float
+  categoria_id       Int
+  imagem_url         String?
+  PedidoProdutos     PedidoProdutos[]
+  categoria          Categorias       @relation(fields: [categoria_id], references: [id])
+
+  @@map("produtos")
+}
+
+model Clientes {
+  id      Int       @id @default(autoincrement())
+  nome    String
+  email   String    @unique
+  cpf     String    @unique
+  cep     String?
+  rua     String?
+  numero  String?
+  bairro  String?
+  cidade  String?
+  estado  String?
+  Pedidos Pedidos[]
+
+  @@map("clientes")
+}
+
+model Pedidos {
+  id             Int              @id @default(autoincrement())
+  cliente_id     Int
+  observacao     String?
+  valor_total    Float
+  PedidoProdutos PedidoProdutos[]
+  cliente        Clientes         @relation(fields: [cliente_id], references: [id])
+
+  @@map("pedidos")
+}
+
+model PedidoProdutos {
+  id                 Int      @id @default(autoincrement())
+  pedido_id          Int
+  produto_id         Int
+  quantidade_produto Int
+  valor_produto      Float
+  pedido             Pedidos  @relation(fields: [pedido_id], references: [id])
+  produto            Produtos @relation(fields: [produto_id], references: [id])
+
+  @@map("pedido_produtos")
+}
